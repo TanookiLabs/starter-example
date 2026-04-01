@@ -21,8 +21,11 @@ model User {
   image         String?
   password      String?
 
-  accounts Account[]
-  sessions Session[]
+  accounts   Account[]
+  sessions   Session[]
+  pitches    Pitch[]
+  votes      Vote[]
+  liveRooms  LiveRoom[]
 
   @@map("users")
 }
@@ -69,3 +72,61 @@ model VerificationToken {
 // Your app tables — add your own models below
 // After editing, run: npm run db:push
 // ═══════════════════════════════════════════════════════════════
+
+model Pitch {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user  User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  roasts    Roast[]
+  votes     Vote[]
+  liveRooms LiveRoom[]
+
+  @@map("pitches")
+}
+
+model Roast {
+  id        String   @id @default(cuid())
+  content   String
+  pitchId   String
+  createdAt DateTime @default(now())
+
+  pitch Pitch @relation(fields: [pitchId], references: [id], onDelete: Cascade)
+
+  @@map("roasts")
+}
+
+model Vote {
+  id        String   @id @default(cuid())
+  value     Int      // 1 for upvote, -1 for downvote
+  pitchId   String
+  userId    String
+  createdAt DateTime @default(now())
+
+  pitch Pitch @relation(fields: [pitchId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([pitchId, userId])
+  @@map("votes")
+}
+
+// Live room for Kahoot-style real-time roasting sessions
+model LiveRoom {
+  id            String   @id @default(cuid())
+  roomCode      String   @unique
+  hostId        String
+  activePitchId String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  host        User   @relation(fields: [hostId], references: [id], onDelete: Cascade)
+  activePitch Pitch? @relation(fields: [activePitchId], references: [id])
+
+  @@map("live_rooms")
+}
+
