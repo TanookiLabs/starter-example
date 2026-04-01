@@ -38,10 +38,10 @@ Save both pairs of connection strings — you'll use the dev ones locally and th
 ### 3. Configure local environment
 
 ```bash
-cp .env.local.example .env.local
+cp .env.example .env
 ```
 
-Edit `.env.local` and fill in:
+Edit `.env` and fill in:
 - `AUTH_SECRET` — generate with `npx auth secret`
 - `DATABASE_URL` — your **dev** Supabase pooled connection string
 - `DIRECT_URL` — your **dev** Supabase direct connection string
@@ -75,13 +75,18 @@ Open [localhost:3000](http://localhost:3000) in your browser. You can sign up wi
 
 ### 7. Deploy to Vercel
 
-```bash
-# Option A: Tell Claude Code
-claude
-> "Deploy this to Vercel"
+**First deploy** — run this once to create the Vercel project and link it to your GitHub repo:
 
-# Option B: Use the Vercel dashboard
-# Go to vercel.com/new → Import your GitHub repo → Deploy
+```bash
+npx vercel
+```
+
+**Subsequent deploys** — just push to GitHub (Vercel auto-deploys), or use Claude Code:
+
+```bash
+# Tell Claude Code
+claude
+> /deploy
 ```
 
 Add environment variables in **Vercel → Settings → Environment Variables**:
@@ -98,7 +103,7 @@ Database schema migrations run automatically on every deploy — the build comma
 
 ```
 LOCAL DEVELOPMENT
-  .env.local → DATABASE_URL + DIRECT_URL point to dev Supabase project
+  .env → DATABASE_URL + DIRECT_URL point to dev Supabase project
   npm run db:push → syncs schema to dev database
   npm run dev → runs app against dev database
 
@@ -110,7 +115,7 @@ PRODUCTION (Vercel)
 
 | Environment | Database | How Schema Gets Updated |
 |-------------|----------|------------------------|
-| **Local dev** | Dev Supabase project (from `.env.local`) | You run `npm run db:push` |
+| **Local dev** | Dev Supabase project (from `.env`) | You run `npm run db:push` |
 | **Production** | Prod Supabase project (from Vercel env vars) | Automatic on every `git push` / deploy |
 
 ## Using Claude Code
@@ -197,7 +202,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 })
 ```
 
-Then add `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET` to your `.env.local`.
+Then add `AUTH_GOOGLE_ID` and `AUTH_GOOGLE_SECRET` to your `.env`.
 
 ## Database with Prisma ORM
 
@@ -235,7 +240,7 @@ model User {
 npm run db:push
 ```
 
-This pushes your schema to the dev database (from `.env.local`). When you deploy to Vercel, the same command runs automatically against the production database.
+This pushes your schema to the dev database (from `.env`). When you deploy to Vercel, the same command runs automatically against the production database.
 
 ### Query data
 
@@ -299,12 +304,12 @@ lib/
 .claude/
   commands/                     ← Custom Claude Code slash commands
 CLAUDE.md                       ← Claude Code project config
-.env.local.example              ← Environment variable template
+.env.example                    ← Environment variable template
 ```
 
 ## Environment Variables
 
-Copy `.env.local.example` to `.env.local` and fill in the values you need:
+Copy `.env.example` to `.env` and fill in the values you need:
 
 | Variable              | Required              | Where to Get It                            |
 | --------------------- | --------------------- | ------------------------------------------ |
